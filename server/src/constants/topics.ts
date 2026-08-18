@@ -1,0 +1,17 @@
+export const DEFAULT_PREPARATION_TOPICS = [
+  { slug: 'javascript', name: 'JavaScript' },
+  { slug: 'typescript', name: 'TypeScript' },
+  { slug: 'react', name: 'React' },
+  { slug: 'nodejs', name: 'Node.js' },
+  { slug: 'express', name: 'Express' },
+  { slug: 'mongodb', name: 'MongoDB' },
+  { slug: 'sql', name: 'SQL' },
+  { slug: 'system-design', name: 'System Design' },
+  { slug: 'dsa', name: 'DSA' },
+  { slug: 'aws', name: 'AWS' },
+  { slug: 'docker', name: 'Docker' },
+  { slug: 'redis', name: 'Redis' },
+  { slug: 'git', name: 'Git' },
+  { slug: 'behavioral', name: 'Behavioral' },
+  { slug: 'hr', name: 'HR' },
+] as const;
