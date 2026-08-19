@@ -6,6 +6,7 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { ApplicationsPage, JobsPage } from '@/pages/ApplicationsJobs';
 import { CompaniesPage, CompanyDetailPage, TargetsPage } from '@/pages/CompaniesPages';
 import { InterviewDetailPage, InterviewsPage, QuestionsPage } from '@/pages/InterviewPages';
+import { PrepStackDetailPage, PrepStackHubPage } from '@/pages/PrepStackPages';
 import {
   AnalyticsPage,
   CalendarPage,
@@ -47,6 +48,8 @@ export default function App() {
           <Route path="/interviews/:id" element={<InterviewDetailPage />} />
           <Route path="/questions" element={<QuestionsPage />} />
           <Route path="/prep/topics" element={<TopicsPage />} />
+          <Route path="/prep/notes" element={<PrepStackHubPage />} />
+          <Route path="/prep/notes/:stack" element={<PrepStackDetailPage />} />
           <Route path="/prep/plan" element={<StudyPlanPage />} />
           <Route path="/prep/weak" element={<WeakAreasPage />} />
           <Route path="/notes" element={<NotesPage />} />

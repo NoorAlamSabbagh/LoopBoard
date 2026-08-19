@@ -10,6 +10,7 @@ import { slugify } from '../utils/crypto.js';
 import { logActivity } from './activityService.js';
 import { targetingService } from './targetingService.js';
 import { requireOwned } from '../utils/requireOwned.js';
+import { DEFAULT_TARGET_COMPANIES } from '../constants/targetCompanies.js';
 
 type ListQuery = {
   page: number;
@@ -64,6 +65,28 @@ export const companyService = {
   async remove(userId: string, id: string) {
     await requireOwned(companyRepository, userId, id, 'Company');
     await companyRepository.delete(userId, id);
+  },
+
+  async seedTargets(userId: string) {
+    const existing = await Company.find({ userId, deletedAt: null }).select('name').lean();
+    const have = new Set(existing.map((c) => c.name.toLowerCase()));
+    const fresh = DEFAULT_TARGET_COMPANIES.filter((c) => !have.has(c.name.toLowerCase()));
+    if (fresh.length === 0) {
+      return { added: 0, skipped: DEFAULT_TARGET_COMPANIES.length, total: existing.length };
+    }
+    await Company.insertMany(
+      fresh.map((c) => ({
+        ...c,
+        userId,
+        slug: slugify(c.name),
+      })),
+    );
+    await logActivity(userId, 'created', 'company', userId, `Added ${fresh.length} target companies`);
+    return {
+      added: fresh.length,
+      skipped: DEFAULT_TARGET_COMPANIES.length - fresh.length,
+      total: existing.length + fresh.length,
+    };
   },
 
   async compare(userId: string, ids: string[]) {

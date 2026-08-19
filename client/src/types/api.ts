@@ -86,6 +86,18 @@ export type Question = {
   difficulty?: string;
   status: string;
   confidence: number;
+  answer?: string;
+  notes?: string;
+};
+
+export type PrepStack = {
+  id: string;
+  name: string;
+  blurb: string;
+  custom?: boolean;
+  topicId?: string;
+  questions: number;
+  notes: number;
 };
 
 export type Topic = {

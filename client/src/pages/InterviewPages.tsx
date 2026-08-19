@@ -6,7 +6,7 @@ import { useDebouncedValue, usePagedList } from '@/hooks/usePagedList';
 import { dataApi } from '@/services/dataApi';
 import { ApiClientError } from '@/services/api';
 import { useUi } from '@/store/ui';
-import type { Application, Company, Interview } from '@/types/api';
+import type { Application, Company, Interview, PrepStack } from '@/types/api';
 import { formatDate, labelize } from '@/utils/format';
 
 export function InterviewsPage({ mode }: { mode: 'upcoming' | 'history' }) {
@@ -252,6 +252,7 @@ export function QuestionsPage() {
   const [technology, setTechnology] = useState('');
   const [status, setStatus] = useState('');
   const [difficulty, setDifficulty] = useState('');
+  const [stacks, setStacks] = useState<PrepStack[]>([]);
   const dq = useDebouncedValue(q);
   const list = usePagedList(dataApi.questions, {
     q: dq,
@@ -261,6 +262,17 @@ export function QuestionsPage() {
   });
   const { register, handleSubmit, reset } = useForm<Record<string, string | number>>();
   const push = useUi((s) => s.push);
+
+  useEffect(() => {
+    void dataApi
+      .stacks()
+      .then((res) => setStacks(res.data))
+      .catch(() => undefined);
+  }, []);
+
+  const techOptions = stacks.length
+    ? stacks.map((s) => s.id)
+    : ['javascript', 'typescript', 'react', 'nodejs', 'mongodb', 'system_design', 'dsa', 'other'];
 
   return (
     <div>
@@ -277,9 +289,9 @@ export function QuestionsPage() {
         <Input className="max-w-xs" placeholder="Search questions" value={q} onChange={(e) => setQ(e.target.value)} />
         <Select className="max-w-40" value={technology} onChange={(e) => setTechnology(e.target.value)}>
           <option value="">All tech</option>
-          {['javascript', 'typescript', 'react', 'nodejs', 'mongodb', 'system_design', 'dsa', 'other'].map((t) => (
+          {techOptions.map((t) => (
             <option key={t} value={t}>
-              {t}
+              {labelize(t)}
             </option>
           ))}
         </Select>
@@ -337,9 +349,9 @@ export function QuestionsPage() {
           </Field>
           <Field label="Technology">
             <Select {...register('technology', { required: true })}>
-              {['javascript', 'typescript', 'react', 'nodejs', 'mongodb', 'system_design', 'dsa', 'other'].map((t) => (
+              {techOptions.map((t) => (
                 <option key={t} value={t}>
-                  {t}
+                  {labelize(t)}
                 </option>
               ))}
             </Select>

@@ -4,6 +4,8 @@ import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 import { cache } from '../config/redis.js';
 import { DEFAULT_PREPARATION_TOPICS } from '../constants/topics.js';
+import { companyService } from './companyService.js';
+import { preparationService } from './prepSkillService.js';
 import { User } from '../models/User.js';
 import { PreparationTopic } from '../models/PreparationTopic.js';
 import { ApiError } from '../utils/ApiError.js';
@@ -54,6 +56,8 @@ export const authService = {
     const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
     const user = await User.create({ name: input.name, email, passwordHash });
     await seedPrepTopics(user.id);
+    await companyService.seedTargets(user.id);
+    await preparationService.seedStackNotes(user.id);
     const tokens = await issueTokens(user.id, email);
     return { user: user.toJSON(), ...tokens };
   },

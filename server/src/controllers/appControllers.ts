@@ -34,6 +34,9 @@ export const companyController = {
     await companyService.remove(uid(req), req.params.id as string);
     res.json(success('Company deleted', null));
   }),
+  seedTargets: asyncHandler(async (req: Request, res: Response) => {
+    res.json(success('Target companies loaded', await companyService.seedTargets(uid(req))));
+  }),
   compare: asyncHandler(async (req: Request, res: Response) => {
     const ids = String(req.query.ids)
       .split(',')
@@ -152,6 +155,12 @@ export const preparationController = {
   createTopic: asyncHandler(async (req: Request, res: Response) => {
     res.status(201).json(success('Topic created', await preparationService.createTopic(uid(req), req.body)));
   }),
+  listStacks: asyncHandler(async (req: Request, res: Response) => {
+    res.json(success('Stacks fetched', await preparationService.listStacks(uid(req))));
+  }),
+  createStack: asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json(success('Stack created', await preparationService.createStack(uid(req), req.body)));
+  }),
   updateTopic: asyncHandler(async (req: Request, res: Response) => {
     res.json(success('Topic updated', await preparationService.updateTopic(uid(req), req.params.id as string, req.body)));
   }),
@@ -174,6 +183,12 @@ export const preparationController = {
   }),
   generate: asyncHandler(async (req: Request, res: Response) => {
     res.status(201).json(success('Study plan generated', await preparationService.generate(uid(req), req.body.targetCompanyId)));
+  }),
+  seedStackNotes: asyncHandler(async (req: Request, res: Response) => {
+    res.json(success('Stack notes loaded', await preparationService.seedStackNotes(uid(req))));
+  }),
+  importFolderNotes: asyncHandler(async (req: Request, res: Response) => {
+    res.json(success('Folder notes imported', await preparationService.importFolderNotes(uid(req))));
   }),
 };
 

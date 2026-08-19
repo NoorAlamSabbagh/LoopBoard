@@ -11,12 +11,14 @@ import {
   Target,
   Timer,
 } from 'lucide-react';
-import { Badge, Card, EmptyState, Progress, Skeleton } from '@/components/ui';
+import { Badge, Button, Card, EmptyState, Progress, Skeleton } from '@/components/ui';
 import { dataApi } from '@/services/dataApi';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/store/theme';
-import type { DashboardData } from '@/types/api';
+import { useUi } from '@/store/ui';
+import type { Company, DashboardData } from '@/types/api';
 import { formatDate, labelize } from '@/utils/format';
+import { ApiClientError } from '@/services/api';
 
 const KPI_META = [
   { key: 'Companies', icon: Building2 },
@@ -38,12 +40,23 @@ export function DashboardPage() {
   const chartBg = dark ? '#161b2c' : '#ffffff';
   const first = user?.name?.split(' ')[0] ?? 'there';
   const [data, setData] = useState<DashboardData | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
+  const push = useUi((s) => s.push);
+
+  async function loadCompanies() {
+    const res = await dataApi.companies({ limit: 100, sort: '-priority' });
+    setCompanies(res.data.filter((c) => !['rejected', 'not_interested'].includes(c.targetStatus)));
+  }
 
   useEffect(() => {
-    void dataApi
-      .dashboard()
-      .then((res) => setData(res.data))
+    void Promise.all([dataApi.dashboard(), dataApi.companies({ limit: 100, sort: '-priority' })])
+      .then(([dash, list]) => {
+        setData(dash.data);
+        setCompanies(list.data.filter((c) => !['rejected', 'not_interested'].includes(c.targetStatus)));
+      })
+      .catch(() => undefined)
       .finally(() => setLoading(false));
   }, []);
 
@@ -102,6 +115,64 @@ export function DashboardPage() {
           );
         })}
       </div>
+
+      <Card className="mt-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[15px] font-semibold">Target companies</p>
+            <p className="text-[13px] text-ink-soft">{companies.length} on your list · grouped by priority</p>
+          </div>
+          <div className="flex gap-2">
+            {companies.length === 0 ? (
+              <Button
+                type="button"
+                disabled={seeding}
+                onClick={async () => {
+                  setSeeding(true);
+                  try {
+                    const res = await dataApi.seedTargetCompanies();
+                    const added = res.data?.added ?? 0;
+                    push(added ? `Added ${added} target companies` : 'List already loaded');
+                    await loadCompanies();
+                  } catch (err) {
+                    push(err instanceof ApiClientError ? err.message : 'Could not load targets', 'err');
+                  } finally {
+                    setSeeding(false);
+                  }
+                }}
+              >
+                {seeding ? 'Loading…' : 'Load target companies'}
+              </Button>
+            ) : (
+              <Link to="/targets" className="text-[13px] font-medium text-accent hover:underline">
+                View all
+              </Link>
+            )}
+          </div>
+        </div>
+        {companies.length === 0 ? (
+          <p className="text-[13px] text-ink-soft">Load the starter list or add companies from Overview → Companies.</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {companies.slice(0, 9).map((c) => (
+              <Link key={c.id} to={`/companies/${c.id}`}>
+                <div className="h-full rounded-lg border border-line p-3.5 hover:border-accent/40">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-[13px] font-semibold">{c.name}</p>
+                    <Badge tone={c.tier === 1 ? 'accent' : 'neutral'}>T{c.tier ?? '—'}</Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-ink-soft">
+                    {c.location ?? 'Location n/a'} · {labelize(c.targetStatus)}
+                  </p>
+                  <div className="mt-2">
+                    <Progress value={c.targetScore ?? 0} />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </Card>
 
       <div className="mt-5 grid gap-3 lg:grid-cols-3">
         <Card className="lg:col-span-2">

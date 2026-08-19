@@ -40,6 +40,7 @@ import {
   statusBody,
   studyPlanBody,
   topicBody,
+  stackBody,
 } from '../validators/resources.js';
 import { authController } from '../controllers/authController.js';
 import {
@@ -93,6 +94,7 @@ apiRouter.get('/search', validate({ query: searchQuery }), metaController.search
 apiRouter.get('/calendar', validate({ query: calendarQuery }), metaController.calendar);
 
 apiRouter.get('/companies/compare', validate({ query: compareQuery }), companyController.compare);
+apiRouter.post('/companies/seed-targets', companyController.seedTargets);
 apiRouter.get('/companies', validate({ query: companyQuery }), companyController.list);
 apiRouter.post('/companies', validate({ body: companyBody }), companyController.create);
 apiRouter.get('/companies/:id', validate({ params: idParams }), companyController.get);
@@ -133,11 +135,15 @@ apiRouter.post('/preparation/topics', validate({ body: topicBody }), preparation
 apiRouter.get('/preparation/topics/:id', validate({ params: idParams }), preparationController.getTopic);
 apiRouter.put('/preparation/topics/:id', validate({ params: idParams, body: topicBody.partial() }), preparationController.updateTopic);
 apiRouter.delete('/preparation/topics/:id', validate({ params: idParams }), preparationController.removeTopic);
+apiRouter.get('/preparation/stacks', preparationController.listStacks);
+apiRouter.post('/preparation/stacks', validate({ body: stackBody }), preparationController.createStack);
 apiRouter.get('/preparation/weak', preparationController.weak);
 apiRouter.get('/preparation/plans', validate({ query: paginationQuery }), preparationController.plans);
 apiRouter.post('/preparation/plans', validate({ body: studyPlanBody }), preparationController.createPlan);
 apiRouter.put('/preparation/plans/:id', validate({ params: idParams, body: studyPlanBody.partial() }), preparationController.updatePlan);
 apiRouter.post('/preparation/plans/generate', validate({ body: generatePlanBody }), preparationController.generate);
+apiRouter.post('/preparation/seed-stack-notes', preparationController.seedStackNotes);
+apiRouter.post('/preparation/import-folder-notes', preparationController.importFolderNotes);
 
 apiRouter.get('/skills', skillController.list);
 apiRouter.post('/skills', validate({ body: skillBody }), skillController.upsert);

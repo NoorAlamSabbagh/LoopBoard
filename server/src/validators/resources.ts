@@ -115,10 +115,21 @@ export const performanceBody = z.object({
   strongTopics: z.array(z.string()).optional(),
 });
 
+const stackTech = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9_]{1,80}$/, 'Use letters, numbers, and underscores');
+
+export const stackBody = z.object({
+  name: z.string().trim().min(1).max(80),
+  blurb: z.string().trim().max(200).optional(),
+});
+
 export const questionQuery = paginationQuery.extend({
   companyId: objectId.optional(),
-  technology: enums.questionCategory.optional(),
-  category: enums.questionCategory.optional(),
+  technology: stackTech.optional(),
+  category: stackTech.optional(),
   difficulty: enums.difficulty.optional(),
   status: enums.questionStatus.optional(),
   confidence: confidence.optional(),
@@ -126,8 +137,8 @@ export const questionQuery = paginationQuery.extend({
 
 export const questionBody = z.object({
   prompt: z.string().trim().min(1).max(4000),
-  technology: enums.questionCategory,
-  category: enums.questionCategory.optional(),
+  technology: stackTech,
+  category: stackTech.optional(),
   difficulty: enums.difficulty.optional(),
   answer: z.string().max(20000).optional(),
   correctAnswer: z.string().max(20000).optional(),

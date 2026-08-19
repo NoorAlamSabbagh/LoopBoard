@@ -27,13 +27,16 @@ type Group = { label: string; items: Item[] };
 const groups: Group[] = [
   {
     label: 'Overview',
-    items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard }],
+    items: [
+      { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/targets', label: 'Target companies', icon: Target },
+      { to: '/companies', label: 'Companies', icon: Building2 },
+    ],
   },
   {
     label: 'Job Search',
     items: [
       { to: '/applications', label: 'Applications', icon: ClipboardList },
-      { to: '/targets', label: 'Target companies', icon: Target },
       { to: '/jobs', label: 'Jobs', icon: Briefcase },
     ],
   },
@@ -49,6 +52,7 @@ const groups: Group[] = [
     label: 'Preparation',
     items: [
       { to: '/prep/topics', label: 'Topics', icon: BookOpen },
+      { to: '/prep/notes', label: 'Notes & questions', icon: StickyNote },
       { to: '/prep/plan', label: 'Study plan', icon: NotebookPen },
       { to: '/prep/weak', label: 'Weak areas', icon: Target },
     ],
@@ -74,7 +78,6 @@ const groups: Group[] = [
       { to: '/resumes', label: 'Resumes', icon: FileText },
       { to: '/analytics', label: 'Analytics', icon: BarChart3 },
       { to: '/calendar', label: 'Calendar', icon: CalendarDays },
-      { to: '/companies', label: 'Companies', icon: Building2 },
       { to: '/settings', label: 'Settings', icon: Settings },
     ],
   },

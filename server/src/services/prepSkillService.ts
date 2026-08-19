@@ -1,9 +1,17 @@
 import type { FilterQuery } from 'mongoose';
+import { Types } from 'mongoose';
 import { Company } from '../models/Company.js';
 import { Job } from '../models/Job.js';
 import { Question } from '../models/Question.js';
 import { Skill } from '../models/Skill.js';
+import { Note } from '../models/Note.js';
+import { PreparationTopic } from '../models/PreparationTopic.js';
 import { WEAK_TOPIC_THRESHOLDS } from '../constants/scores.js';
+import { STACK_PREP } from '../constants/stackPrep.js';
+import { hashQuestion } from '../utils/crypto.js';
+import { ApiError } from '../utils/ApiError.js';
+import { BUILTIN_STACK_TECH, stackIdFromName, topicSlugFromTech } from '../utils/stackSlug.js';
+import { ensureStackFolder, readPrepNoteFiles } from './prepNotesFiles.js';
 import {
   preparationTopicRepository,
   skillRepository,
@@ -15,6 +23,16 @@ import { logActivity } from './activityService.js';
 import { skillEngine, targetingService } from './targetingService.js';
 
 type ListQuery = { page: number; limit: number; sort?: string; q?: string };
+
+function displayStackName(stack: string) {
+  if (stack === 'other') return 'Other';
+  return STACK_PREP.find((s) => s.id === stack)?.name ?? stack.replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function techFromTopicSlug(slug: string) {
+  if (slug === 'system-design') return 'system_design';
+  return slug.replaceAll('-', '_');
+}
 
 export const preparationService = {
   async listTopics(userId: string, query: ListQuery) {
@@ -120,6 +138,240 @@ export const preparationService = {
       targetCompanyId: company?._id ? String(company._id) : undefined,
       items,
     });
+  },
+
+  async seedStackNotes(userId: string) {
+    const topics = await PreparationTopic.find({ userId }).lean();
+    let questionsAdded = 0;
+    let notesAdded = 0;
+
+    for (const stack of STACK_PREP) {
+      const slug = stack.id === 'system_design' ? 'system-design' : stack.id;
+      let topic = topics.find((t) => t.slug === slug);
+      if (!topic) {
+        topic = (
+          await PreparationTopic.create({
+            userId,
+            slug,
+            name: stack.name,
+            progress: 0,
+            confidence: 1,
+          })
+        ).toObject();
+        topics.push(topic);
+      }
+
+      for (const q of stack.questions) {
+        const normalizedHash = hashQuestion(q.prompt);
+        const exists = await Question.findOne({ userId, normalizedHash, deletedAt: null });
+        if (exists) continue;
+        await Question.create({
+          userId,
+          prompt: q.prompt,
+          normalizedHash,
+          technology: stack.id,
+          category: stack.id,
+          difficulty: q.difficulty,
+          answer: q.answer,
+          notes: q.notes,
+          status: 'not_studied',
+          confidence: 1,
+        });
+        questionsAdded += 1;
+      }
+
+      for (const n of stack.notes) {
+        const exists = await Note.findOne({ userId, title: n.title, tags: stack.id });
+        if (exists) continue;
+        await Note.create({
+          userId,
+          title: n.title,
+          content: n.content,
+          tags: [stack.id, 'stack'],
+          entityType: 'preparation_topic',
+          entityId: topic._id,
+        });
+        notesAdded += 1;
+      }
+    }
+
+    await logActivity(userId, 'created', 'question', userId, `Seeded stack notes (${questionsAdded} questions, ${notesAdded} notes)`);
+    return { questionsAdded, notesAdded, stacks: STACK_PREP.length };
+  },
+
+  async listStacks(userId: string) {
+    const uid = new Types.ObjectId(userId);
+    const [topics, qRows, nRows] = await Promise.all([
+      PreparationTopic.find({ userId }).lean(),
+      Question.aggregate([
+        { $match: { userId: uid, deletedAt: null } },
+        { $group: { _id: '$technology', n: { $sum: 1 } } },
+      ]),
+      Note.aggregate([
+        { $match: { userId: uid, tags: 'stack' } },
+        { $unwind: '$tags' },
+        { $match: { $expr: { $not: { $regexMatch: { input: '$tags', regex: '^(stack|src:)' } } } } },
+        { $group: { _id: '$tags', n: { $sum: 1 } } },
+      ]),
+    ]);
+    const qMap = Object.fromEntries(qRows.map((r) => [String(r._id), r.n as number]));
+    const nMap = Object.fromEntries(nRows.map((r) => [String(r._id), r.n as number]));
+
+    const builtins = [
+      ...STACK_PREP.map((s) => ({
+        id: s.id,
+        name: s.name,
+        blurb: s.blurb,
+        custom: false,
+        questions: qMap[s.id] ?? 0,
+        notes: nMap[s.id] ?? 0,
+      })),
+      {
+        id: 'other',
+        name: 'Other',
+        blurb: 'Notes from folders that do not match a stack',
+        custom: false,
+        questions: qMap.other ?? 0,
+        notes: nMap.other ?? 0,
+      },
+    ];
+
+    const custom = topics
+      .filter((t) => t.kind === 'stack')
+      .map((t) => {
+        const id = techFromTopicSlug(t.slug);
+        return {
+          id,
+          name: t.name,
+          blurb: t.notes || `Your ${t.name} notes and questions`,
+          custom: true,
+          topicId: String(t._id),
+          questions: qMap[id] ?? 0,
+          notes: nMap[id] ?? 0,
+        };
+      })
+      .filter((s) => !BUILTIN_STACK_TECH.has(s.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return [...builtins, ...custom];
+  },
+
+  async createStack(userId: string, data: { name: string; blurb?: string }) {
+    const id = stackIdFromName(data.name);
+    if (!id) throw ApiError.badRequest('Give the stack a name with letters or numbers');
+    if (BUILTIN_STACK_TECH.has(id)) {
+      throw ApiError.conflict(`${displayStackName(id)} is already on the hub`);
+    }
+
+    const slug = topicSlugFromTech(id);
+    let topic = await PreparationTopic.findOne({ userId, slug });
+    if (topic?.kind === 'stack') {
+      throw ApiError.conflict(`${topic.name} is already a stack`);
+    }
+    if (topic) {
+      topic.kind = 'stack';
+      topic.name = data.name.trim();
+      if (data.blurb) topic.notes = data.blurb;
+      await topic.save();
+    } else {
+      topic = await PreparationTopic.create({
+        userId,
+        slug,
+        name: data.name.trim(),
+        notes: data.blurb ?? '',
+        progress: 0,
+        confidence: 1,
+        kind: 'stack',
+      });
+    }
+
+    await ensureStackFolder(id);
+    await logActivity(userId, 'created', 'preparation_topic', String(topic._id), `Added stack ${topic.name}`);
+    return {
+      id,
+      name: topic.name,
+      blurb: topic.notes || `Your ${topic.name} notes and questions`,
+      custom: true,
+      topicId: String(topic._id),
+      questions: 0,
+      notes: 0,
+    };
+  },
+
+  async importFolderNotes(userId: string) {
+    const { dir, files } = await readPrepNoteFiles();
+    if (files.length === 0) {
+      return { dir, scanned: 0, notesAdded: 0, notesUpdated: 0, questionsAdded: 0 };
+    }
+
+    const topics = await PreparationTopic.find({ userId }).lean();
+    let notesAdded = 0;
+    let notesUpdated = 0;
+    let questionsAdded = 0;
+
+    for (const file of files) {
+      const stack = file.stack;
+      const slug = topicSlugFromTech(stack);
+      let topic = topics.find((t) => t.slug === slug);
+      if (!topic) {
+        topic = (
+          await PreparationTopic.create({
+            userId,
+            slug,
+            name: displayStackName(stack),
+            progress: 0,
+            confidence: 1,
+            kind: BUILTIN_STACK_TECH.has(stack) ? 'topic' : 'stack',
+          })
+        ).toObject();
+        topics.push(topic);
+      } else if (!BUILTIN_STACK_TECH.has(stack) && topic.kind !== 'stack') {
+        await PreparationTopic.updateOne({ _id: topic._id }, { $set: { kind: 'stack' } });
+        topic.kind = 'stack';
+      }
+
+      const sourceTag = `src:${file.rel}`;
+      const tech = stack === 'other' ? 'other' : stack;
+      const existingNote = await Note.findOne({ userId, tags: sourceTag });
+      if (existingNote) {
+        existingNote.title = file.title;
+        existingNote.content = file.content;
+        await existingNote.save();
+        notesUpdated += 1;
+      } else {
+        await Note.create({
+          userId,
+          title: file.title,
+          content: file.content,
+          tags: [tech, 'stack', sourceTag],
+          entityType: 'preparation_topic',
+          entityId: topic._id,
+        });
+        notesAdded += 1;
+      }
+
+      for (const q of file.questions) {
+        const normalizedHash = hashQuestion(q.prompt);
+        const exists = await Question.findOne({ userId, normalizedHash, deletedAt: null });
+        if (exists) continue;
+        await Question.create({
+          userId,
+          prompt: q.prompt,
+          normalizedHash,
+          technology: tech,
+          category: tech,
+          difficulty: 'medium',
+          answer: q.answer,
+          notes: `Imported from prep-notes/${file.rel}`,
+          status: 'not_studied',
+          confidence: 1,
+        });
+        questionsAdded += 1;
+      }
+    }
+
+    await logActivity(userId, 'created', 'note', userId, `Imported ${notesAdded} notes from prep-notes`);
+    return { dir, scanned: files.length, notesAdded, notesUpdated, questionsAdded };
   },
 };
 

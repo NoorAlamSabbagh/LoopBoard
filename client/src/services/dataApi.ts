@@ -7,6 +7,7 @@ import type {
   Job,
   Note,
   NotificationItem,
+  PrepStack,
   Question,
   Recruiter,
   Resume,
@@ -50,6 +51,8 @@ export const dataApi = {
   companies: (query?: ListQuery) => unwrap<Company[]>(api.get(`/companies${qs(query)}`)),
   company: (id: string) => unwrap<Company>(api.get(`/companies/${id}`)),
   createCompany: (body: Record<string, unknown>) => unwrap<Company>(api.post('/companies', body)),
+  seedTargetCompanies: () =>
+    unwrap<{ added: number; skipped: number; total: number }>(api.post('/companies/seed-targets')),
   updateCompany: (id: string, body: Record<string, unknown>) => unwrap<Company>(api.put(`/companies/${id}`, body)),
   deleteCompany: (id: string) => unwrap<null>(api.delete(`/companies/${id}`)),
   compare: (ids: string[]) => unwrap<unknown[]>(api.get(`/companies/compare${qs({ ids: ids.join(',') })}`)),
@@ -80,11 +83,22 @@ export const dataApi = {
   updateQuestion: (id: string, body: Record<string, unknown>) => unwrap<Question>(api.put(`/questions/${id}`, body)),
   deleteQuestion: (id: string) => unwrap<null>(api.delete(`/questions/${id}`)),
 
-  topics: () => unwrap<Topic[]>(api.get('/preparation/topics')),
+  topics: (query?: ListQuery) => unwrap<Topic[]>(api.get(`/preparation/topics${qs(query)}`)),
+  createTopic: (body: { slug: string; name: string; notes?: string }) =>
+    unwrap<Topic>(api.post('/preparation/topics', body)),
+  stacks: () => unwrap<PrepStack[]>(api.get('/preparation/stacks')),
+  createStack: (body: { name: string; blurb?: string }) =>
+    unwrap<PrepStack>(api.post('/preparation/stacks', body)),
   updateTopic: (id: string, body: Record<string, unknown>) => unwrap<Topic>(api.put(`/preparation/topics/${id}`, body)),
   weak: () => unwrap<{ technology: string; questionsAsked: number; avgConfidence: number; needsPreparation: boolean }[]>(api.get('/preparation/weak')),
   plans: () => unwrap<{ id: string; title: string; items: { title: string; priority: number; reason?: string; done?: boolean }[] }[]>(api.get('/preparation/plans')),
   generatePlan: (targetCompanyId?: string) => unwrap<unknown>(api.post('/preparation/plans/generate', { targetCompanyId })),
+  seedStackNotes: () =>
+    unwrap<{ questionsAdded: number; notesAdded: number; stacks: number }>(api.post('/preparation/seed-stack-notes')),
+  importFolderNotes: () =>
+    unwrap<{ dir: string; scanned: number; notesAdded: number; notesUpdated: number; questionsAdded: number }>(
+      api.post('/preparation/import-folder-notes'),
+    ),
 
   skills: () => unwrap<Skill[]>(api.get('/skills')),
   upsertSkill: (body: { name: string; selfScore: number }) => unwrap<Skill>(api.post('/skills', body)),

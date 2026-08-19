@@ -42,9 +42,10 @@ export function CompaniesPage() {
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
   const dq = useDebouncedValue(q);
-  const list = usePagedList(dataApi.companies, { q: dq, targetStatus: status || undefined, sort: '-priority' });
+  const list = usePagedList(dataApi.companies, { q: dq, targetStatus: status || undefined, sort: '-priority' }, 50);
   const { register, handleSubmit, reset } = useForm<Record<string, string | number>>();
   const push = useUi((s) => s.push);
+  const [seeding, setSeeding] = useState(false);
 
   return (
     <div>
@@ -52,9 +53,36 @@ export function CompaniesPage() {
         title="Companies"
         subtitle="Research, status, and cached target scores."
         actions={
-          <Button type="button" onClick={() => setOpen(true)}>
-            Add company
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              type="button"
+              disabled={seeding}
+              onClick={async () => {
+                setSeeding(true);
+                try {
+                  const res = await dataApi.seedTargetCompanies();
+                  const added = res.data?.added ?? 0;
+                  const skipped = res.data?.skipped ?? 0;
+                  push(
+                    added
+                      ? `Added ${added} target companies${skipped ? ` (${skipped} already there)` : ''}`
+                      : 'All recommended companies are already on your list',
+                  );
+                  list.reload();
+                } catch (err) {
+                  push(err instanceof ApiClientError ? err.message : 'Could not load targets', 'err');
+                } finally {
+                  setSeeding(false);
+                }
+              }}
+            >
+              {seeding ? 'Loading…' : 'Load target companies'}
+            </Button>
+            <Button type="button" onClick={() => setOpen(true)}>
+              Add company
+            </Button>
+          </div>
         }
       />
       <div className="mb-4 flex flex-wrap gap-2">
@@ -143,13 +171,49 @@ export function CompaniesPage() {
 
 export function TargetsPage() {
   const [rows, setRows] = useState<Company[]>([]);
+  const [seeding, setSeeding] = useState(false);
+  const push = useUi((s) => s.push);
+
+  async function loadRows() {
+    const r = await dataApi.companies({ limit: 100 });
+    setRows(r.data.filter((c) => !['rejected', 'not_interested', 'offer'].includes(c.targetStatus)));
+  }
+
   useEffect(() => {
-    void dataApi.companies({ limit: 100 }).then((r) => setRows(r.data.filter((c) => !['rejected', 'not_interested', 'offer'].includes(c.targetStatus))));
+    void loadRows();
   }, []);
+
   const tiers = [1, 2, 3] as const;
   return (
     <div>
-      <PageHeader title="Target companies" subtitle="Grouped by the tier you assigned." />
+      <PageHeader
+        title="Target companies"
+        subtitle="Grouped by the tier you assigned. Load the starter list if this page is empty."
+        actions={
+          <Button
+            type="button"
+            disabled={seeding}
+            onClick={async () => {
+              setSeeding(true);
+              try {
+                const res = await dataApi.seedTargetCompanies();
+                const added = res.data?.added ?? 0;
+                push(added ? `Added ${added} target companies` : 'All recommended companies are already on your list');
+                await loadRows();
+              } catch (err) {
+                push(err instanceof ApiClientError ? err.message : 'Could not load targets', 'err');
+              } finally {
+                setSeeding(false);
+              }
+            }}
+          >
+            {seeding ? 'Loading…' : 'Load target companies'}
+          </Button>
+        }
+      />
+      {rows.length === 0 ? (
+        <EmptyState title="No target companies yet" hint="Click Load target companies in the top right, or add one from Companies." />
+      ) : null}
       <div className="space-y-6">
         {tiers.map((tier) => (
           <section key={tier}>

@@ -31,6 +31,7 @@ const preparationTopicSchema = new Schema(
     resources: { type: [resourceSchema], default: [] },
     questionIds: { type: [Schema.Types.ObjectId], ref: 'Question', default: [] },
     notes: optionalString(8000),
+    kind: { type: String, enum: ['topic', 'stack'], default: 'topic' },
   },
   { timestamps: true },
 );

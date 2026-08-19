@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
-import { DIFFICULTIES, QUESTION_CATEGORIES, QUESTION_STATUSES } from '../constants/enums.js';
+import { DIFFICULTIES, QUESTION_STATUSES } from '../constants/enums.js';
 import { applyJsonTransform, confidenceField, objectId, optionalString, requiredString } from './schemaHelpers.js';
 
 const questionSchema = new Schema(
@@ -13,8 +13,22 @@ const questionSchema = new Schema(
       maxlength: 64,
       match: [/^[a-f0-9]{64}$/, 'normalizedHash must be sha256 hex'],
     },
-    technology: { type: String, enum: QUESTION_CATEGORIES, required: true },
-    category: { type: String, enum: QUESTION_CATEGORIES, required: true },
+    technology: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      maxlength: 80,
+      match: [/^[a-z0-9_]+$/, 'technology must be lowercase snake_case'],
+    },
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      maxlength: 80,
+      match: [/^[a-z0-9_]+$/, 'category must be lowercase snake_case'],
+    },
     difficulty: { type: String, enum: DIFFICULTIES, default: 'medium' },
     answer: optionalString(20000),
     correctAnswer: optionalString(20000),
