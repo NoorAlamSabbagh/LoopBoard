@@ -1,1 +1,1036 @@
 
+# Build a Full-Stack Interview & Company Targeting Portal Using MERN
+
+Act as a Senior Product Architect, and Senior MERN Stack Developer, Software Engineer and Full stack developer.
+
+I want you to design and build a production-quality Interview & Company Targeting Portal using the MERN stack.
+
+The purpose of this application is to help a software developer manage their entire job-search and interview preparation process in one place.
+
+The portal should allow me to:
+* Track every company I apply to.
+* Track every interview I attend.
+* Store interview questions asked by each company.
+* Track interview rounds and outcomes.
+* Track companies I want to target.
+* Track my preparation progress.
+* Analyze which companies/technologies I should focus on.
+* Maintain a personal interview-question database.
+* Track applications, interviews, offers and rejections.
+* Identify frequently asked questions.
+* Maintain notes about recruiters/interviewers.
+* Track job descriptions and required skills.
+* Compare my skills with a company's requirements.
+* Create a personalized preparation plan.
+* View useful analytics and dashboards.
+The application should be scalable so that more modules can be added later.
+# 1. Technology Stack
+Use:
+## Frontend
+* React
+* TypeScript
+* Vite
+* React Router
+* Redux Toolkit or Zustand
+* React Hook Form
+* Tailwind CSS + Bootstrap
+* Axios
+* Recharts or another suitable charting library
+## Backend
+* Node.js
+* Express.js
+* TypeScript
+* MongoDB
+* Mongoose
+* JWT authentication
+* bcrypt
+* Redis
+* REST APIs
+## Development
+* ESLint
+* Prettier
+* Environment variables
+* Proper error handling
+* API validation
+* Logging
+* Clean folder structure
+# 2. Application Name
+Use a professional name such as:
+InterviewTrack
+You can suggest 5 better names before implementation.
+The application should feel like a modern SaaS product rather than a basic CRUD application.
+# 3. Main Modules
+Create the following modules.
+#Dashboard
+The dashboard should provide a complete overview.
+Display:
+* Total companies
+* Total applications
+* Interviews scheduled
+* Interviews completed
+* Upcoming interviews
+* Offers
+* Rejections
+* Pending applications
+* Companies currently targeting
+* Preparation progress
+* Most frequently asked interview topics
+* Most frequently asked questions
+* Skills that need improvement
+Charts:
+* Applications over time
+* Interviews over time
+* Interview success rate
+* Applications by status
+* Interviews by company
+* Questions by technology
+* Offers vs rejections
+Also show:
+#Upcoming Interviews
+Example:
+Google
+Round 2
+Tomorrow
+10:30 AM
+Preparation: 75%
+#Recent Activity
+Example:
+Added interview question from Amazon
+Updated Microsoft application
+Completed React preparation
+Added Google to target companies
+# 4. Company Management
+Create a complete company management module.
+Each company should have:
+Company Name
+Logo
+Website
+Location
+Industry
+Company Size
+Company Type
+Description
+Career Page
+LinkedIn
+Glassdoor
+Priority
+Target Status
+Notes
+
+Target status:
+* Target
+* High Priority
+* Medium Priority
+* Low Priority
+* Applied
+* Interviewing
+* Offer
+* Rejected
+* Not Interested
+
+Allow filtering and sorting.
+Company detail page should contain:
+#Overview
+#Jobs
+#Applications
+#Interviews
+#Interview Questions
+#Required Skills
+#Preparation
+#Notes
+#Salary Information
+#Company Research
+
+#5Target Companies Module
+This is one of the most important modules.
+I should be able to create my own target-company list.
+Example:
+Tier 1
+Google
+Microsoft
+Amazon
+Tier 2
+Adobe
+Salesforce
+Atlassian
+Tier 3
+Other companies
+
+For each company show:
+Company
+Target Position
+Required Experience
+Required Skills
+My Skill Match %
+Preparation %
+Application Status
+Last Applied
+Next Action
+Priority
+
+Add a Company Target Score.
+Example:
+Company Target Score: 82%
+Skill Match: 90%
+Experience Match: 80%
+Interview Readiness: 70%
+Company Interest: 95%
+# 6. Job/Application Tracker
+Create an application tracking system.
+Each application should have:
+Company
+Job Title
+Job ID
+Job URL
+Location
+Work Mode
+Salary Range
+Employment Type
+Application Date
+Application Source
+Recruiter
+Recruiter Email
+Status
+Resume Version
+Cover Letter
+Notes
+
+Application statuses:
+Saved
+Applied
+Recruiter Contacted
+Screening
+Interview Scheduled
+Interviewing
+Offer
+Rejected
+Withdrawn
+Closed
+Create a Kanban board similar to a modern ATS.
+Columns:
+Saved
+Applied
+Screening
+Interview
+Offer
+Rejected
+
+Allow drag-and-drop between statuses.
+# 7. Interview Management
+Create a dedicated Interview module.
+Each interview should contain:
+Company
+Job
+Interview Date
+Interview Time
+Interview Type
+Round Number
+Round Name
+Interviewer
+Meeting Link
+Interview Status
+Difficulty
+Result
+Feedback
+Notes
+
+Interview types:
+* HR
+* Recruiter
+* Technical
+* Coding
+* System Design
+* Managerial
+* Behavioral
+* Final Round
+
+Interview result:
+* Pending
+* Passed
+* Failed
+* Rescheduled
+* Cancelled
+
+# 8. Interview Questions Database
+This should be one of the core features.
+I should be able to save every question asked during interviews.
+
+Question fields:
+Question
+Company
+Job
+Interview Round
+Technology
+Category
+Difficulty
+Date Asked
+Answer
+My Answer
+Correct Answer
+Confidence
+Status
+Notes
+
+Categories:
+JavaScript
+TypeScript
+React
+Node.js
+Express
+MongoDB
+SQL
+System Design
+DSA
+AWS
+Docker
+Redis
+Git
+HTML
+CSS
+Behavioral
+HR
+Project Based
+Other
+
+Question status:
+Not Studied
+Studying
+Weak
+Good
+Mastered
+
+Confidence:
+1
+2
+3
+4
+5
+
+# 9. Question Analytics
+Create analytics for interview questions.
+Show:
+### Most Asked Questions
+Example:
+1. Explain Event Loop
+Asked by 7 companies
+2. MongoDB Aggregation
+Asked by 5 companies
+3. React useEffect
+Asked by 4 companies
+
+### Most Asked Technologies
+JavaScript       32%
+React            24%
+Node.js          18%
+MongoDB          14%
+System Design     8%
+Other             4%
+
+#Weak Topics
+Identify topics where:
+Questions Asked: 12
+Correct Answers: 5
+Confidence: Low
+
+Mark them as:
+Needs Preparation
+
+# 10. Preparation Module
+Create a complete interview preparation system.
+Allow me to create preparation plans for:
+JavaScript
+TypeScript
+React
+Node.js
+Express
+MongoDB
+SQL
+System Design
+DSA
+AWS
+Docker
+Redis
+Git
+Behavioral
+HR
+Each topic should contain:
+Topic
+Subtopics
+Questions
+Resources
+Progress
+Confidence
+Last Studied
+Next Review
+Progress:
+Not Started
+25%
+50%
+75%
+100%
+
+# 11. Personalized Preparation
+The system should analyze:
+Target Companies
+Job Requirements
+My Skills
+Interview Questions
+Weak Topics
+Previous Interview Performance
+Then generate a recommended preparation plan.
+Example:
+Your next target is Amazon.
+Based on your previous interviews:
+Priority 1
+JavaScript
+Event Loop
+Promises
+Closures
+
+Priority 2
+Node.js
+Streams
+Cluster
+Worker Threads
+
+Priority 3
+System Design
+Caching
+Load Balancing
+Database Scaling
+
+Create a Recommended Next Actions section.
+# 12. Skills Management
+Create a skill profile.
+Example:
+JavaScript       85%
+TypeScript       70%
+React            90%
+Node.js          80%
+MongoDB          75%
+PostgreSQL       65%
+AWS              55%
+Docker           60%
+Redis            50%
+System Design    45%
+DSA              40%
+
+Allow manual updates.
+Also calculate skill levels from interview performance where possible.
+# 13. Resume Management
+Create a Resume module.
+I should be able to store multiple resume versions.
+Example:
+MERN Developer Resume
+Backend Developer Resume
+Full Stack Developer Resume
+
+For each resume:
+Resume Name
+Version
+Target Role
+Skills
+Projects
+Experience
+File
+Created Date
+Updated Date
+Allow me to associate a resume version with an application.
+
+# 14. Recruiter Management
+Create a Recruiter/Contact module.
+
+Fields:
+Name
+Company
+Designation
+Email
+Phone
+LinkedIn
+Relationship
+Last Contacted
+Next Follow-up
+Notes
+Track communication history.
+
+# 15. Interview Calendar
+Create a calendar module.
+Display:
+* Upcoming interviews
+* Past interviews
+* Follow-ups
+* Preparation deadlines
+* Application deadlines
+Allow daily/weekly/monthly views.
+
+# 16. Notes Module
+Create a general notes system.
+Notes can belong to:
+Company
+Application
+Interview
+Question
+Preparation Topic
+Recruiter
+
+Support:
+* Title
+* Content
+* Tags
+* Date
+* Search
+
+# 17. Search
+Create global search.
+I should be able to search:
+Company
+Job
+Interview
+Question
+Technology
+Recruiter
+Notes
+
+Example:
+Searching:
+MongoDB
+should return:
+MongoDB questions
+Companies asking MongoDB
+Interviews containing MongoDB
+Preparation topics
+My MongoDB notes
+
+# 18. Filters
+Every major module should have useful filters.
+Examples:
+#Questions
+Filter by:
+Company
+Technology
+Difficulty
+Category
+Status
+Confidence
+Date
+
+#Applications
+Filter by:
+Company
+Status
+Job Title
+Location
+Date
+Priority
+
+#Interviews
+Filter by:
+Company
+Round
+Result
+Technology
+Date
+
+# 19. Notifications
+Create notification support.
+Examples:
+Interview tomorrow
+Follow-up due
+Preparation task due
+Application follow-up required
+Company application deadline
+Design the system so email/browser notifications can be added later.
+
+# 20. Authentication
+Implement:
+Register
+Login
+Logout
+Forgot Password
+Reset Password
+Change Password
+Refresh Token
+Protected Routes
+Use secure password hashing.
+Do not store passwords in plain text.
+
+# 21. User Profile
+Profile should contain:
+Name
+Email
+Phone
+Location
+Years of Experience
+Current Role
+Target Role
+Expected Salary
+Preferred Locations
+Preferred Work Mode
+Skills
+GitHub
+LinkedIn
+Portfolio
+Resume
+
+# 22. UI/UX Requirements
+The UI should look like a modern SaaS dashboard.
+Use:
+* Responsive design
+* Sidebar navigation
+* Top navigation
+* Cards
+* Tables
+* Charts
+* Modal forms
+* Drawers
+* Tabs
+* Badges
+* Progress bars
+* Empty states
+* Loading states
+* Skeleton loaders
+* Toast notifications
+* Confirmation dialogs
+
+Support:
+* Desktop
+* Tablet
+* Mobile
+
+Use a clean professional developer/SaaS design.
+
+Avoid making it look like a generic admin template.
+# 23. Suggested Sidebar
+
+Create:
+Dashboard
+Job Search
+ ├── Applications
+ ├── Target Companies
+ ├── Jobs
+
+Interviews
+ ├── Upcoming Interviews
+ ├── Interview History
+ ├── Interview Questions
+
+Preparation
+ ├── Topics
+ ├── Study Plan
+ ├── Weak Areas
+
+Knowledge
+ ├── Question Bank
+ ├── Notes
+ ├── Skills
+
+People
+ ├── Recruiters
+ ├── Contacts
+
+Documents
+ ├── Resumes
+
+Analytics
+
+Calendar
+
+Settings
+
+# 24. MongoDB Database Design
+Design proper MongoDB schemas for:
+User
+Company
+Job
+Application
+Interview
+InterviewQuestion
+Question
+PreparationTopic
+StudyPlan
+Skill
+Resume
+Recruiter
+Note
+Notification
+Define:
+* References
+* Indexes
+* Unique constraints
+* Timestamps
+* Validation
+* Pagination strategy
+Avoid unnecessary duplication.
+Use MongoDB aggregation where appropriate.
+
+# 25. Backend Architecture
+Use a clean architecture such as:
+server/
+ ├── src/
+ │   ├── config/
+ │   ├── controllers/
+ │   ├── services/
+ │   ├── repositories/
+ │   ├── models/
+ │   ├── routes/
+ │   ├── middleware/
+ │   ├── validators/
+ │   ├── utils/
+ │   ├── types/
+ │   ├── constants/
+ │   └── app.ts
+ ├── package.json
+ └── tsconfig.json
+
+Use:
+Controller
+   ↓
+Service
+   ↓
+Repository
+   ↓
+MongoDB
+Keep business logic out of controllers.
+
+# 26. Frontend Architecture
+Use:
+client/
+ ├── src/
+ │   ├── components/
+ │   ├── pages/
+ │   ├── layouts/
+ │   ├── hooks/
+ │   ├── services/
+ │   ├── store/
+ │   ├── types/
+ │   ├── utils/
+ │   ├── constants/
+ │   └── routes/
+Create reusable components.
+
+Avoid duplicate UI code.
+
+# 27. REST API Design
+Create proper REST APIs.
+Examples:
+POST   /api/auth/register
+POST   /api/auth/login
+POST   /api/auth/logout
+
+GET    /api/dashboard
+
+GET    /api/companies
+POST   /api/companies
+GET    /api/companies/:id
+PUT    /api/companies/:id
+DELETE /api/companies/:id
+
+GET    /api/applications
+POST   /api/applications
+PUT    /api/applications/:id
+DELETE /api/applications/:id
+
+GET    /api/interviews
+POST   /api/interviews
+PUT    /api/interviews/:id
+DELETE /api/interviews/:id
+
+GET    /api/questions
+POST   /api/questions
+PUT    /api/questions/:id
+DELETE /api/questions/:id
+
+GET    /api/preparation
+POST   /api/preparation
+
+GET    /api/analytics
+Add:
+* Pagination
+* Filtering
+* Sorting
+* Searching
+* Validation
+* Consistent API response format
+* Centralized error handling
+
+# 28. API Response Format
+Use a consistent format.
+Success:
+json
+{
+  "success": true,
+  "message": "Application created successfully",
+  "data": {}
+}
+
+Error:
+{
+  "success": false,
+  "message": "Application not found",
+  "error": {}
+}
+
+# 29. Dashboard Intelligence
+
+The dashboard should not simply display database records.
+
+Create useful insights.
+
+For example:
+You have interviewed with 12 companies.
+
+Your strongest area:
+React
+
+Your weakest area:
+System Design
+
+Most frequently asked:
+JavaScript
+
+Companies where you have the highest skill match:
+Adobe
+Atlassian
+Salesforce
+
+Recommended next target:
+Company X
+
+Recommended preparation:
+Node.js Streams
+MongoDB Aggregation
+System Design - Caching
+
+# 30. Company Comparison
+Create a comparison feature.
+Allow me to select multiple companies and compare:
+Company
+Role
+Salary
+Location
+Required Skills
+My Skill Match
+Interview Difficulty
+Number of Rounds
+Preparation Progress
+Application Status
+
+# 31. Interview Performance
+
+After every interview, allow me to record:
+Overall Performance
+Technical Performance
+Communication
+Confidence
+Questions Answered
+Questions Missed
+Difficulty
+Feedback
+What Went Well
+What Went Wrong
+What To Improve
+Then generate performance trends.
+# 32. Important UX Feature
+
+After an interview, show:
+#What should I prepare next?"
+Example:
+Based on this interview:
+❌ Weak: MongoDB Aggregation
+❌ Weak: System Design
+⚠️ Medium: Node.js
+✅ Strong: React
+
+Recommended preparation:
+1. MongoDB $lookup
+2. MongoDB $group
+3. MongoDB $facet
+4. System Design - Caching
+5. Node.js Event Loop
+
+# 33. Future AI Integration
+Architect the application so AI can be integrated later.
+Potential AI features:
+AI Interview Question Generator
+AI Resume Analyzer
+AI Job Description Analyzer
+AI Company Research
+AI Interview Feedback
+AI Personalized Study Plan
+AI Mock Interview
+AI Answer Evaluation
+AI Skill Gap Analysis
+
+Do not implement expensive AI functionality initially unless necessary.
+Design the architecture so it can be added later.
+
+# 34. Security
+Implement:
+* JWT authentication
+* Password hashing
+* Input validation
+* Rate limiting
+* CORS configuration
+* Helmet
+* Secure cookies where appropriate
+* Authorization middleware
+* MongoDB injection protection
+* Environment variables
+* Proper error handling
+* Do not expose sensitive information
+
+# 35. Performance
+
+The application should be designed for scalability.
+Use:
+* Database indexes
+* Pagination
+* Debounced search
+* Lazy loading
+* Code splitting
+* API caching where useful
+* Efficient MongoDB queries
+* Aggregation pipelines
+* Avoid N+1 queries
+* Avoid loading unnecessary fields
+* Proper React memoization where required
+
+# 36. Deliverables
+Do NOT immediately dump the entire codebase.
+Work in phases.
+## Phase 1 — Product Architecture
+
+First provide:
+1. Product overview
+2. Feature list
+3. User flow
+4. Page hierarchy
+5. Database ER-style relationship explanation
+6. MongoDB schemas
+7. API architecture
+8. Frontend architecture
+9. Backend architecture
+10. Recommended folder structure
+11. Authentication architecture
+12. Dashboard design
+13. UI/UX design system
+Then wait for my approval.
+## Phase 2 — Database
+After approval:
+* Create all Mongoose schemas
+* Add indexes
+* Add validation
+* Explain relationships
+#Phase 3 — Backend
+Implement:
+* Authentication
+* Companies
+* Jobs
+* Applications
+* Interviews
+* Questions
+* Preparation
+* Skills
+* Recruiters
+* Notes
+* Analytics
+#Phase 4 — Frontend
+Implement:
+* Login/Register
+* Dashboard
+* Company pages
+* Application tracker
+* Interview tracker
+* Question bank
+* Preparation dashboard
+* Analytics
+* Calendar
+* Settings
+## Phase 5 — Integration
+Connect frontend and backend.
+Implement:
+* Authentication
+* API integration
+* Loading states
+* Error handling
+* Notifications
+* Pagination
+* Search
+* Filtering
+## Phase 6 — Testing
+Add:
+* Backend unit tests
+* API tests
+* Frontend component tests
+* Authentication tests
+* Validation tests
+## Phase 7 — Deployment
+Provide deployment instructions for:
+Frontend → Vercel
+Backend → AWS / Render / Railway
+Database → MongoDB Atlas
+
+Include:
+* Environment variables
+* CORS
+* Production configuration
+* Build commands
+* Deployment steps
+
+# 37. Important Development Rules
+Follow these rules throughout development:
+1. Use TypeScript.
+2. Write production-quality code.
+3. Follow SOLID principles where appropriate.
+4. Keep components small and reusable.
+5. Do not duplicate code.
+6. Do not put business logic inside React components.
+7. Do not put business logic directly inside Express controllers.
+8. Validate all API inputs.
+9. Use proper HTTP status codes.
+10. Handle errors centrally.
+11. Use MongoDB indexes appropriately.
+12. Use pagination for large datasets.
+13. Do not expose secrets.
+14. Keep environment-specific configuration in `.env`.
+15. Make the application responsive.
+16. Make accessibility a consideration.
+17. Use meaningful variable and function names.
+18. Add comments only where they provide real value.
+19. Prefer maintainability over clever code.
+20. Do not over-engineer simple features.
+
+# 38. First Task
+Before writing implementation code, analyze the complete requirement.
+Then provide:
+#A. Product Architecture
+#B. Complete Feature Breakdown
+#C. User Journey
+#D. Database Schema Design
+#E. MongoDB Relationships
+#F. REST API Specification
+#G. Frontend Page Structure
+#H. Backend Folder Structure
+#I. Frontend Folder Structure
+#J. Dashboard Wireframe
+#K. UI Component Strategy
+#L. Authentication Flow
+#M. Application/Interview Workflow
+#N. Question Bank Workflow
+#O. Company Targeting Algorithm
+#P. Skill Gap Analysis Logic
+#Q. Analytics Strategy
+#R. Future AI Integration Architecture
+#S. Development Roadmap
+Do not start generating the entire application until the architecture has been reviewed.
+The final product should feel like a professional personal ATS + Interview Knowledge Base + Company Targeting + Interview Preparation platform, specifically designed for a software developer's job search.
+
+#One important suggestion
+For your use case, I would not make this only an "interview tracker." Make it a combination of:
+Personal ATS + Interview Question Bank + Company Targeting + Preparation Tracker + Analytics
+The most valuable workflow would be:
+Company → Job → Application → Interview → Questions → Performance → Weak Areas → Preparation → Next Target
+That creates a feedback loop instead of just storing information.
+For example:
+> You interview at Company A → save 15 questions → system identifies that you struggled with MongoDB aggregation → MongoDB becomes a weak topic → preparation progress increases → when another company requires MongoDB, your skill-match score automatically improves.
+That would make your portal genuinely useful rather than just another CRUD project.
