@@ -643,8 +643,8 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
                     {/* Folder Row */}
                     <div
                       className={`group flex items-center justify-between px-2 py-1.5 rounded-lg transition cursor-pointer ${isFolderActive
-                          ? 'bg-accent/10 text-accent font-medium'
-                          : 'text-ink hover:bg-paper-2'
+                        ? 'bg-accent/10 text-accent font-medium'
+                        : 'text-ink hover:bg-paper-2'
                         }`}
                       onClick={() => setSelectedFolder(isFolderActive ? null : folderName)}
                     >
@@ -702,8 +702,8 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
                               type="button"
                               onClick={() => handleSelectNote(note)}
                               className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left transition ${isActive
-                                  ? 'bg-accent text-white font-medium shadow-xs'
-                                  : 'text-ink-soft hover:bg-paper-2 hover:text-ink'
+                                ? 'bg-accent text-white font-medium shadow-xs'
+                                : 'text-ink-soft hover:bg-paper-2 hover:text-ink'
                                 }`}
                             >
                               <div className="flex items-center gap-2 min-w-0">
@@ -750,8 +750,8 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
                     type="button"
                     onClick={() => handleSelectNote(note)}
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition my-0.5 ${isActive
-                        ? 'bg-accent text-white font-medium shadow-xs'
-                        : 'text-ink hover:bg-paper-2'
+                      ? 'bg-accent text-white font-medium shadow-xs'
+                      : 'text-ink hover:bg-paper-2'
                       }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
