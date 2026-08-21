@@ -23,7 +23,6 @@ import {
   Plus,
   Maximize2,
   Minimize2,
-  X,
 } from 'lucide-react';
 import { Badge, Button, Card, Field, Input, Select, Textarea } from '@/components/ui';
 import { dataApi } from '@/services/dataApi';
@@ -601,9 +600,8 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
           <button
             type="button"
             onClick={() => setSelectedFolder(null)}
-            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition text-left ${
-              selectedFolder === null ? 'bg-accent/15 text-accent font-semibold' : 'text-ink-soft hover:bg-paper-2 hover:text-ink'
-            }`}
+            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition text-left ${selectedFolder === null ? 'bg-accent/15 text-accent font-semibold' : 'text-ink-soft hover:bg-paper-2 hover:text-ink'
+              }`}
           >
             <div className="flex items-center gap-2">
               <BookOpen className="h-3.5 w-3.5" />
@@ -617,9 +615,8 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
             <button
               type="button"
               onClick={() => setSelectedFolder('')}
-              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition text-left ${
-                selectedFolder === '' ? 'bg-accent/15 text-accent font-semibold' : 'text-ink-soft hover:bg-paper-2 hover:text-ink'
-              }`}
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition text-left ${selectedFolder === '' ? 'bg-accent/15 text-accent font-semibold' : 'text-ink-soft hover:bg-paper-2 hover:text-ink'
+                }`}
             >
               <div className="flex items-center gap-2">
                 <FileCode className="h-3.5 w-3.5" />
@@ -645,11 +642,10 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
                   <div key={folderName} className="space-y-0.5">
                     {/* Folder Row */}
                     <div
-                      className={`group flex items-center justify-between px-2 py-1.5 rounded-lg transition cursor-pointer ${
-                        isFolderActive
+                      className={`group flex items-center justify-between px-2 py-1.5 rounded-lg transition cursor-pointer ${isFolderActive
                           ? 'bg-accent/10 text-accent font-medium'
                           : 'text-ink hover:bg-paper-2'
-                      }`}
+                        }`}
                       onClick={() => setSelectedFolder(isFolderActive ? null : folderName)}
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
@@ -705,11 +701,10 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
                               key={note.id}
                               type="button"
                               onClick={() => handleSelectNote(note)}
-                              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left transition ${
-                                isActive
+                              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-left transition ${isActive
                                   ? 'bg-accent text-white font-medium shadow-xs'
                                   : 'text-ink-soft hover:bg-paper-2 hover:text-ink'
-                              }`}
+                                }`}
                             >
                               <div className="flex items-center gap-2 min-w-0">
                                 <FileText className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-white' : 'text-accent'}`} />
@@ -718,9 +713,8 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
 
                               {qCount > 0 && (
                                 <span
-                                  className={`text-[10px] px-1 py-0.2 rounded font-mono shrink-0 ${
-                                    isActive ? 'bg-white/20 text-white' : 'bg-ok/10 text-ok'
-                                  }`}
+                                  className={`text-[10px] px-1 py-0.2 rounded font-mono shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-ok/10 text-ok'
+                                    }`}
                                   title={`${qCount} Q&A questions`}
                                 >
                                   {qCount}Q
@@ -755,11 +749,10 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
                     key={note.id}
                     type="button"
                     onClick={() => handleSelectNote(note)}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition my-0.5 ${
-                      isActive
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition my-0.5 ${isActive
                         ? 'bg-accent text-white font-medium shadow-xs'
                         : 'text-ink hover:bg-paper-2'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <FileText className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-white' : 'text-accent'}`} />
@@ -775,9 +768,8 @@ export function PrepNotesExplorer({ stack, meta, notes, topicId, onNotesChange, 
 
                     {qCount > 0 && (
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0 ${
-                          isActive ? 'bg-white/20 text-white' : 'bg-ok/10 text-ok'
-                        }`}
+                        className={`text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-ok/10 text-ok'
+                          }`}
                         title={`${qCount} Q&A questions`}
                       >
                         {qCount}Q
