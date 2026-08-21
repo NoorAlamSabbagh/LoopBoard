@@ -70,7 +70,6 @@ function parseQaBlocks(content: string): ParsedQa[] {
 // Simple & robust Markdown renderer with line numbers
 function MarkdownView({ content }: { content: string }) {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
   function copyCode(text: string, id: string) {
     navigator.clipboard.writeText(text);
     setCopiedCode(id);
