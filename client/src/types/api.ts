@@ -98,6 +98,25 @@ export type PrepStack = {
   topicId?: string;
   questions: number;
   notes: number;
+  folders?: number;
+};
+
+export type ImportFolderNotesResult = {
+  dir: string;
+  scanned: number;
+  notesAdded: number;
+  notesUpdated: number;
+  questionsAdded: number;
+  stack?: string;
+};
+
+export type ImportStackFilesResult = {
+  stack: string;
+  scanned: number;
+  notesAdded: number;
+  notesUpdated: number;
+  questionsAdded: number;
+  folders: string[];
 };
 
 export type Topic = {
@@ -132,9 +151,11 @@ export type Note = {
   title: string;
   content: string;
   tags?: string[];
+  folderPath?: string;
   entityType: string;
   entityId: string;
   createdAt?: string;
+  updatedAt?: string;
 };
 
 export type Resume = {

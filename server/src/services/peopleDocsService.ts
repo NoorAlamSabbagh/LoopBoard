@@ -56,12 +56,13 @@ export const recruiterService = {
 };
 
 export const noteService = {
-  async list(userId: string, query: ListQuery & { entityType?: string; entityId?: string; tag?: string }) {
+  async list(userId: string, query: ListQuery & { entityType?: string; entityId?: string; tag?: string; folderPath?: string }) {
     const filter: FilterQuery<unknown> = {
       ...searchFilter(query.q, ['title', 'content', 'tags']),
       ...(query.entityType ? { entityType: query.entityType } : {}),
       ...(query.entityId ? { entityId: query.entityId } : {}),
       ...(query.tag ? { tags: query.tag } : {}),
+      ...(query.folderPath !== undefined ? { folderPath: query.folderPath } : {}),
     };
     return noteRepository.list(userId, { page: query.page, limit: query.limit, sort: query.sort, filter });
   },

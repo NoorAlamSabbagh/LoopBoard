@@ -217,14 +217,36 @@ export const noteQuery = paginationQuery.extend({
   entityType: enums.noteEntity.optional(),
   entityId: objectId.optional(),
   tag: z.string().optional(),
+  folderPath: z.string().optional(),
 });
 
 export const noteBody = z.object({
-  title: z.string().min(1).max(200),
-  content: z.string().min(1).max(20000),
+  title: z.string().min(1).max(300),
+  content: z.string().min(1).max(500000),
   tags: z.array(z.string()).optional(),
+  folderPath: z.string().max(500).optional(),
   entityType: enums.noteEntity,
   entityId: objectId,
+});
+
+export const importFolderNotesBody = z
+  .object({
+    stack: z.string().optional(),
+  })
+  .optional();
+
+export const importStackFilesBody = z.object({
+  stack: z.string().min(1).max(80),
+  files: z
+    .array(
+      z.object({
+        path: z.string().min(1).max(500),
+        name: z.string().max(300).optional(),
+        content: z.string().max(500000),
+      }),
+    )
+    .min(1)
+    .max(1000),
 });
 
 export const resumeBody = z.object({

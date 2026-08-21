@@ -95,10 +95,19 @@ export const dataApi = {
   generatePlan: (targetCompanyId?: string) => unwrap<unknown>(api.post('/preparation/plans/generate', { targetCompanyId })),
   seedStackNotes: () =>
     unwrap<{ questionsAdded: number; notesAdded: number; stacks: number }>(api.post('/preparation/seed-stack-notes')),
-  importFolderNotes: () =>
-    unwrap<{ dir: string; scanned: number; notesAdded: number; notesUpdated: number; questionsAdded: number }>(
-      api.post('/preparation/import-folder-notes'),
+  importFolderNotes: (stack?: string) =>
+    unwrap<{ dir: string; scanned: number; notesAdded: number; notesUpdated: number; questionsAdded: number; stack?: string }>(
+      api.post('/preparation/import-folder-notes', { stack }),
     ),
+  importStackFiles: (body: { stack: string; files: { path: string; name?: string; content: string }[] }) =>
+    unwrap<{
+      stack: string;
+      scanned: number;
+      notesAdded: number;
+      notesUpdated: number;
+      questionsAdded: number;
+      folders: string[];
+    }>(api.post('/preparation/import-stack-files', body)),
 
   skills: () => unwrap<Skill[]>(api.get('/skills')),
   upsertSkill: (body: { name: string; selfScore: number }) => unwrap<Skill>(api.post('/skills', body)),
@@ -109,6 +118,7 @@ export const dataApi = {
 
   notes: (query?: ListQuery) => unwrap<Note[]>(api.get(`/notes${qs(query)}`)),
   createNote: (body: Record<string, unknown>) => unwrap<Note>(api.post('/notes', body)),
+  updateNote: (id: string, body: Record<string, unknown>) => unwrap<Note>(api.put(`/notes/${id}`, body)),
   deleteNote: (id: string) => unwrap<null>(api.delete(`/notes/${id}`)),
 
   resumes: (query?: ListQuery) => unwrap<Resume[]>(api.get(`/resumes${qs(query)}`)),

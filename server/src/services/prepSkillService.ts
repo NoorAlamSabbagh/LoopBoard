@@ -10,8 +10,9 @@ import { WEAK_TOPIC_THRESHOLDS } from '../constants/scores.js';
 import { STACK_PREP } from '../constants/stackPrep.js';
 import { hashQuestion } from '../utils/crypto.js';
 import { ApiError } from '../utils/ApiError.js';
+import path from 'node:path';
 import { BUILTIN_STACK_TECH, stackIdFromName, topicSlugFromTech } from '../utils/stackSlug.js';
-import { ensureStackFolder, readPrepNoteFiles } from './prepNotesFiles.js';
+import { ensureStackFolder, parseQaBlocks, readPrepNoteFiles, titleFromFile } from './prepNotesFiles.js';
 import {
   preparationTopicRepository,
   skillRepository,
@@ -201,7 +202,7 @@ export const preparationService = {
 
   async listStacks(userId: string) {
     const uid = new Types.ObjectId(userId);
-    const [topics, qRows, nRows] = await Promise.all([
+    const [topics, qRows, nRows, fRows] = await Promise.all([
       PreparationTopic.find({ userId }).lean(),
       Question.aggregate([
         { $match: { userId: uid, deletedAt: null } },
@@ -210,12 +211,20 @@ export const preparationService = {
       Note.aggregate([
         { $match: { userId: uid, tags: 'stack' } },
         { $unwind: '$tags' },
-        { $match: { $expr: { $not: { $regexMatch: { input: '$tags', regex: '^(stack|src:)' } } } } },
+        { $match: { $expr: { $not: { $regexMatch: { input: '$tags', regex: '^(stack|src:|upload:)' } } } } },
         { $group: { _id: '$tags', n: { $sum: 1 } } },
+      ]),
+      Note.aggregate([
+        { $match: { userId: uid, tags: 'stack', folderPath: { $nin: ['', null] } } },
+        { $unwind: '$tags' },
+        { $match: { $expr: { $not: { $regexMatch: { input: '$tags', regex: '^(stack|src:|upload:)' } } } } },
+        { $group: { _id: { tag: '$tags', folder: '$folderPath' } } },
+        { $group: { _id: '$_id.tag', folders: { $sum: 1 } } },
       ]),
     ]);
     const qMap = Object.fromEntries(qRows.map((r) => [String(r._id), r.n as number]));
     const nMap = Object.fromEntries(nRows.map((r) => [String(r._id), r.n as number]));
+    const fMap = Object.fromEntries(fRows.map((r) => [String(r._id), r.folders as number]));
 
     const builtins = [
       ...STACK_PREP.map((s) => ({
@@ -225,6 +234,7 @@ export const preparationService = {
         custom: false,
         questions: qMap[s.id] ?? 0,
         notes: nMap[s.id] ?? 0,
+        folders: fMap[s.id] ?? 0,
       })),
       {
         id: 'other',
@@ -233,6 +243,7 @@ export const preparationService = {
         custom: false,
         questions: qMap.other ?? 0,
         notes: nMap.other ?? 0,
+        folders: fMap.other ?? 0,
       },
     ];
 
@@ -248,6 +259,7 @@ export const preparationService = {
           topicId: String(t._id),
           questions: qMap[id] ?? 0,
           notes: nMap[id] ?? 0,
+          folders: fMap[id] ?? 0,
         };
       })
       .filter((s) => !BUILTIN_STACK_TECH.has(s.id))
@@ -295,13 +307,14 @@ export const preparationService = {
       topicId: String(topic._id),
       questions: 0,
       notes: 0,
+      folders: 0,
     };
   },
 
-  async importFolderNotes(userId: string) {
-    const { dir, files } = await readPrepNoteFiles();
+  async importFolderNotes(userId: string, targetStack?: string) {
+    const { dir, files } = await readPrepNoteFiles(targetStack);
     if (files.length === 0) {
-      return { dir, scanned: 0, notesAdded: 0, notesUpdated: 0, questionsAdded: 0 };
+      return { dir, scanned: 0, notesAdded: 0, notesUpdated: 0, questionsAdded: 0, stack: targetStack };
     }
 
     const topics = await PreparationTopic.find({ userId }).lean();
@@ -336,6 +349,7 @@ export const preparationService = {
       if (existingNote) {
         existingNote.title = file.title;
         existingNote.content = file.content;
+        existingNote.folderPath = file.folderPath || '';
         await existingNote.save();
         notesUpdated += 1;
       } else {
@@ -343,6 +357,7 @@ export const preparationService = {
           userId,
           title: file.title,
           content: file.content,
+          folderPath: file.folderPath || '',
           tags: [tech, 'stack', sourceTag],
           entityType: 'preparation_topic',
           entityId: topic._id,
@@ -370,8 +385,131 @@ export const preparationService = {
       }
     }
 
-    await logActivity(userId, 'created', 'note', userId, `Imported ${notesAdded} notes from prep-notes`);
-    return { dir, scanned: files.length, notesAdded, notesUpdated, questionsAdded };
+    await logActivity(
+      userId,
+      'created',
+      'note',
+      userId,
+      `Imported ${notesAdded} notes${targetStack ? ` into ${displayStackName(targetStack)}` : ''} from prep-notes`,
+    );
+    return { dir, scanned: files.length, notesAdded, notesUpdated, questionsAdded, stack: targetStack };
+  },
+
+  async importStackFiles(
+    userId: string,
+    data: { stack: string; files: Array<{ path: string; name?: string; content: string }> },
+  ) {
+    const rawStack = data.stack.trim().toLowerCase();
+    const stack = rawStack === 'system-design' ? 'system_design' : rawStack.replaceAll('-', '_');
+    const slug = topicSlugFromTech(stack);
+
+    let topic = await PreparationTopic.findOne({ userId, slug });
+    if (!topic) {
+      topic = await PreparationTopic.create({
+        userId,
+        slug,
+        name: displayStackName(stack),
+        progress: 0,
+        confidence: 1,
+        kind: BUILTIN_STACK_TECH.has(stack) ? 'topic' : 'stack',
+      });
+    }
+
+    let notesAdded = 0;
+    let notesUpdated = 0;
+    let questionsAdded = 0;
+    const foldersSet = new Set<string>();
+
+    for (const f of data.files) {
+      const content = f.content?.trim();
+      if (!content) continue;
+
+      const normPath = f.path.replace(/\\/g, '/').replace(/^\/+/, '');
+      const parts = normPath.split('/');
+
+      let folderPath = '';
+      if (parts.length > 1) {
+        if (parts[0]?.toLowerCase() === stack || parts[0]?.toLowerCase() === slug) {
+          folderPath = parts.slice(1, -1).join('/');
+        } else {
+          folderPath = parts.slice(0, -1).join('/');
+        }
+      }
+
+      if (folderPath) foldersSet.add(folderPath);
+
+      const title = (
+        titleFromFile(normPath, content) || f.name || path.basename(normPath).replace(/\.(md|markdown|txt|js|ts|jsx|tsx|py|json|sql|html|css|yaml|yml|sh)$/i, '')
+      ).slice(0, 300);
+      const safeContent = content.slice(0, 500000);
+      const questions = parseQaBlocks(safeContent);
+      const sourceTag = `upload:${stack}/${normPath}`.slice(0, 300);
+
+      let note = await Note.findOne({
+        userId,
+        entityId: topic._id,
+        $or: [{ tags: sourceTag }, { title, folderPath }],
+      });
+
+      if (note) {
+        note.title = title;
+        note.content = safeContent;
+        note.folderPath = folderPath;
+        if (!note.tags.includes(stack)) note.tags.push(stack);
+        if (!note.tags.includes('stack')) note.tags.push('stack');
+        if (!note.tags.includes(sourceTag)) note.tags.push(sourceTag);
+        await note.save();
+        notesUpdated += 1;
+      } else {
+        await Note.create({
+          userId,
+          title,
+          content: safeContent,
+          folderPath,
+          tags: [stack, 'stack', sourceTag],
+          entityType: 'preparation_topic',
+          entityId: topic._id,
+        });
+        notesAdded += 1;
+      }
+
+      for (const q of questions) {
+        const prompt = q.prompt.slice(0, 4000);
+        const normalizedHash = hashQuestion(prompt);
+        const exists = await Question.findOne({ userId, normalizedHash, deletedAt: null });
+        if (exists) continue;
+        await Question.create({
+          userId,
+          prompt,
+          normalizedHash,
+          technology: stack,
+          category: stack,
+          difficulty: 'medium',
+          answer: q.answer ? q.answer.slice(0, 100000) : '',
+          notes: `Imported from ${normPath}`.slice(0, 50000),
+          status: 'not_studied',
+          confidence: 1,
+        });
+        questionsAdded += 1;
+      }
+    }
+
+    await logActivity(
+      userId,
+      'created',
+      'note',
+      userId,
+      `Imported ${notesAdded} notes and ${questionsAdded} questions into ${displayStackName(stack)}`,
+    );
+
+    return {
+      stack,
+      scanned: data.files.length,
+      notesAdded,
+      notesUpdated,
+      questionsAdded,
+      folders: Array.from(foldersSet),
+    };
   },
 };
 

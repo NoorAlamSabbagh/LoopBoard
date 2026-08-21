@@ -41,6 +41,8 @@ import {
   studyPlanBody,
   topicBody,
   stackBody,
+  importFolderNotesBody,
+  importStackFilesBody,
 } from '../validators/resources.js';
 import { authController } from '../controllers/authController.js';
 import {
@@ -143,7 +145,8 @@ apiRouter.post('/preparation/plans', validate({ body: studyPlanBody }), preparat
 apiRouter.put('/preparation/plans/:id', validate({ params: idParams, body: studyPlanBody.partial() }), preparationController.updatePlan);
 apiRouter.post('/preparation/plans/generate', validate({ body: generatePlanBody }), preparationController.generate);
 apiRouter.post('/preparation/seed-stack-notes', preparationController.seedStackNotes);
-apiRouter.post('/preparation/import-folder-notes', preparationController.importFolderNotes);
+apiRouter.post('/preparation/import-folder-notes', validate({ body: importFolderNotesBody }), preparationController.importFolderNotes);
+apiRouter.post('/preparation/import-stack-files', validate({ body: importStackFilesBody }), preparationController.importStackFiles);
 
 apiRouter.get('/skills', skillController.list);
 apiRouter.post('/skills', validate({ body: skillBody }), skillController.upsert);

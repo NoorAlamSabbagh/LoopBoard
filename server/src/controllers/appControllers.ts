@@ -188,7 +188,11 @@ export const preparationController = {
     res.json(success('Stack notes loaded', await preparationService.seedStackNotes(uid(req))));
   }),
   importFolderNotes: asyncHandler(async (req: Request, res: Response) => {
-    res.json(success('Folder notes imported', await preparationService.importFolderNotes(uid(req))));
+    const stack = (req.body as { stack?: string } | undefined)?.stack;
+    res.json(success('Folder notes imported', await preparationService.importFolderNotes(uid(req), stack)));
+  }),
+  importStackFiles: asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json(success('Files imported into stack', await preparationService.importStackFiles(uid(req), req.body)));
   }),
 };
 
