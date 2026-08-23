@@ -16,11 +16,16 @@ export function createApp() {
   app.set('trust proxy', 1);
   app.use(helmet());
   app.use(
+    // cors({
+    //   origin: env.CLIENT_ORIGIN,
+    //   credentials: true,
+    // }),
     cors({
-      origin: env.CLIENT_ORIGIN,
+      origin: "https://loop-board-lyart.vercel.app",
       credentials: true,
     }),
   );
+
   app.use(express.json({ limit: '25mb' }));
   app.use(express.urlencoded({ extended: true, limit: '25mb' }));
   app.use(cookieParser());

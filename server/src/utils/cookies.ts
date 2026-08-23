@@ -6,8 +6,8 @@ export function refreshCookieOptions(): CookieOptions {
   return {
     httpOnly: true,
     secure: true,
-    sameSite: 'none',
-    path: '/api/auth',
+    sameSite: "none",
+    path: "/api/auth",
     maxAge: env.JWT_REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000,
   };
 }
