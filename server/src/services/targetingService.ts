@@ -135,11 +135,9 @@ export const targetingService = {
 
   async recomputeAll(userId: string) {
     const companies = await Company.find({ userId, deletedAt: null }).select('_id').lean();
-    const scores = [];
-    for (const company of companies) {
-      scores.push(await this.recomputeCompany(userId, String(company._id)));
-    }
-    return scores;
+    // Run all company recomputes in parallel — reduces wall-clock time from
+    // (N companies × serial latency) to the time of the single slowest company.
+    return Promise.all(companies.map((company) => this.recomputeCompany(userId, String(company._id))));
   },
 
   async recommendedNextTarget(userId: string) {

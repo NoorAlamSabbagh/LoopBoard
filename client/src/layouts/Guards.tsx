@@ -3,7 +3,6 @@ import { AppShell } from '@/layouts/AppShell';
 import { useAuth } from '@/store/auth';
 import { Skeleton } from '@/components/ui';
 import { Logo } from '@/components/Logo';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function ProtectedLayout() {
   const { user, ready } = useAuth();
@@ -65,9 +64,6 @@ export function GuestLayout() {
       </section>
 
       <section className="relative z-10 grid place-items-center bg-[#0c111d] px-5 py-10">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle className="text-white hover:bg-white/10 hover:text-white" />
-        </div>
         <div className="w-full max-w-[400px]">
           <Logo inverted className="mb-8 lg:hidden" />
           <div className="auth-panel rounded-2xl border border-white/10 bg-[#161b2c] p-8">

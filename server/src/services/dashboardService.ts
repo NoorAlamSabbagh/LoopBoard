@@ -135,7 +135,9 @@ export const dashboardService = {
     };
 
     try {
-      await cache.set(cacheKey, JSON.stringify(data), 60);
+      // 5-minute TTL: dashboard data doesn't change every minute, and at scale
+      // a 60s TTL would rebuild 60×/hour/user against MongoDB Atlas.
+      await cache.set(cacheKey, JSON.stringify(data), 300);
     } catch {
       // ignore cache write failures
     }

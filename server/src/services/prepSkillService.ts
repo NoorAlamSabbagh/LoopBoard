@@ -162,37 +162,59 @@ export const preparationService = {
         topics.push(topic);
       }
 
-      for (const q of stack.questions) {
-        const normalizedHash = hashQuestion(q.prompt);
-        const exists = await Question.findOne({ userId, normalizedHash, deletedAt: null });
-        if (exists) continue;
-        await Question.create({
-          userId,
-          prompt: q.prompt,
-          normalizedHash,
-          technology: stack.id,
-          category: stack.id,
-          difficulty: q.difficulty,
-          answer: q.answer,
-          notes: q.notes,
-          status: 'not_studied',
-          confidence: 1,
+      // Bulk-upsert all questions for this stack in a single DB round-trip.
+      // The unique index on {userId, normalizedHash} prevents duplicates automatically.
+      if (stack.questions.length > 0) {
+        const uidObj = new Types.ObjectId(userId);
+        const ops = stack.questions.map((q) => {
+          const normalizedHash = hashQuestion(q.prompt);
+          return {
+            updateOne: {
+              filter: { userId, normalizedHash, deletedAt: null },
+              update: {
+                $setOnInsert: {
+                  userId: uidObj,
+                  prompt: q.prompt,
+                  normalizedHash,
+                  technology: stack.id,
+                  category: stack.id,
+                  difficulty: q.difficulty,
+                  answer: q.answer,
+                  notes: q.notes,
+                  status: 'not_studied' as const,
+                  confidence: 1,
+                  deletedAt: null,
+                },
+              },
+              upsert: true,
+            },
+          };
         });
-        questionsAdded += 1;
+        const result = await Question.bulkWrite(ops, { ordered: false });
+        questionsAdded += result.upsertedCount;
       }
 
-      for (const n of stack.notes) {
-        const exists = await Note.findOne({ userId, title: n.title, tags: stack.id });
-        if (exists) continue;
-        await Note.create({
-          userId,
-          title: n.title,
-          content: n.content,
-          tags: [stack.id, 'stack'],
-          entityType: 'preparation_topic',
-          entityId: topic._id,
-        });
-        notesAdded += 1;
+      // Bulk-upsert notes for this stack in a single DB round-trip.
+      if (stack.notes.length > 0) {
+        const uidObj = new Types.ObjectId(userId);
+        const noteOps = stack.notes.map((n) => ({
+          updateOne: {
+            filter: { userId, title: n.title, tags: stack.id },
+            update: {
+              $setOnInsert: {
+                userId: uidObj,
+                title: n.title,
+                content: n.content,
+                tags: [stack.id, 'stack'],
+                entityType: 'preparation_topic' as const,
+                entityId: topic!._id,
+              },
+            },
+            upsert: true,
+          },
+        }));
+        const noteResult = await Note.bulkWrite(noteOps, { ordered: false });
+        notesAdded += noteResult.upsertedCount;
       }
     }
 

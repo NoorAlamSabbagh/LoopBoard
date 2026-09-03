@@ -19,6 +19,7 @@ export function LoginPage() {
         try {
           const res = await authApi.login(values);
           setSession(res.data.user, res.data.accessToken);
+          push('Login successful!', 'ok');
           navigate('/');
         } catch (err) {
           push(err instanceof ApiClientError ? err.message : 'Login failed', 'err');
@@ -63,6 +64,7 @@ export function RegisterPage() {
         try {
           const res = await authApi.register(values);
           setSession(res.data.user, res.data.accessToken);
+          push('Account created successfully!', 'ok');
           navigate('/');
         } catch (err) {
           push(err instanceof ApiClientError ? err.message : 'Could not register', 'err');

@@ -12,7 +12,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { randomToken, sha256 } from '../utils/crypto.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 
-const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = 10; // 10 is industry-standard secure and 4× faster than 12 on low-CPU servers
 const RESET_TTL_SECONDS = 60 * 60;
 
 function refreshKey(userId: string, jti: string) {
@@ -55,9 +55,15 @@ export const authService = {
 
     const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
     const user = await User.create({ name: input.name, email, passwordHash });
-    await seedPrepTopics(user.id);
-    await companyService.seedTargets(user.id);
-    await preparationService.seedStackNotes(user.id);
+
+    // Fire-and-forget: seed default data in the background so the JWT is returned
+    // immediately (~1s). The dashboard will populate within a few seconds after login.
+    void Promise.all([
+      seedPrepTopics(user.id),
+      companyService.seedTargets(user.id),
+      preparationService.seedStackNotes(user.id),
+    ]).catch((err) => logger.error({ err, userId: user.id }, 'Background seeding failed'));
+
     const tokens = await issueTokens(user.id, email);
     return { user: user.toJSON(), ...tokens };
   },

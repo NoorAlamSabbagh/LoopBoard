@@ -9,7 +9,6 @@ import { useDebouncedValue } from '@/hooks/usePagedList';
 import { dataApi } from '@/services/dataApi';
 import { useAuth } from '@/store/auth';
 import { useUi } from '@/store/ui';
-import { cn } from '@/utils/format';
 
 const SEARCH_ROUTES: Record<string, (id: string) => string> = {
   companies: (id) => `/companies/${id}`,
@@ -25,7 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
   const navigate = useNavigate();
-  const { sidebarOpen, setSidebarOpen, toasts, dismiss } = useUi();
+  const { sidebarOpen, setSidebarOpen, push } = useUi();
   const [q, setQ] = useState('');
   const dq = useDebouncedValue(q, 280);
   const [results, setResults] = useState<Record<string, unknown[]> | null>(null);
@@ -123,6 +122,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={async () => {
                   await logout();
+                  push('Logged out successfully', 'ok');
                   navigate('/login');
                 }}
               >
@@ -132,21 +132,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <main className="mx-auto w-full max-w-[1200px] flex-1 px-5 py-6 sm:px-8">{children}</main>
-      </div>
-      <div className="pointer-events-none fixed right-4 bottom-4 z-50 space-y-2">
-        {toasts.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => dismiss(t.id)}
-            className={cn(
-              'pointer-events-auto block w-80 rounded-lg border px-3.5 py-2.5 text-left text-[13px] shadow-lg',
-              t.tone === 'err' ? 'border-danger/20 bg-card text-danger' : 'border-line bg-card text-ink',
-            )}
-          >
-            {t.message}
-          </button>
-        ))}
       </div>
     </div>
   );

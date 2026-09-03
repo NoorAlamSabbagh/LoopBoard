@@ -16,10 +16,6 @@ export function createApp() {
   app.set('trust proxy', 1);
   app.use(helmet());
   app.use(
-    // cors({
-    //   origin: env.CLIENT_ORIGIN,
-    //   credentials: true,
-    // }),
     cors({
       origin: "https://loop-board-lyart.vercel.app",
       credentials: true,
@@ -51,6 +47,11 @@ export function createApp() {
 
   app.get('/health', (_req, res) => {
     res.json(success('ok', { status: 'healthy' }));
+  });
+
+  // Keep-alive endpoint — ping this every 14 min via UptimeRobot to prevent Render cold starts
+  app.get('/ping', (_req, res) => {
+    res.sendStatus(200);
   });
 
   app.use('/api/auth', authLimiter, authRouter);
