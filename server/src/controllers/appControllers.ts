@@ -90,6 +90,14 @@ export const applicationController = {
     await applicationService.remove(uid(req), req.params.id as string);
     res.json(success('Application deleted', null));
   }),
+  addTimeline: asyncHandler(async (req: Request, res: Response) => {
+    res.json(
+      success(
+        'Timeline event added',
+        await applicationService.addTimelineEvent(uid(req), req.params.id as string, req.body),
+      ),
+    );
+  }),
 };
 
 export const interviewController = {

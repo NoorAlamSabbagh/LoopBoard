@@ -4,6 +4,9 @@ Personal ATS, interview question bank, company targeting, prep tracker, and anal
 
 The product loop is: **Company → Job → Application → Interview → Questions → Performance → Weak areas → Prep → Skill scores → Next target**.
 
+> **Architecture & Full Workflow**: See [PROJECT_HISTORY_AND_FLOW.md](PROJECT_HISTORY_AND_FLOW.md) for the complete end-to-end flow, database relationships, and algorithmic scoring formulas. AI assistants read [AGENTS.md](AGENTS.md) for automatic session context.
+
+
 ## Stack
 
 | Layer | Tech |

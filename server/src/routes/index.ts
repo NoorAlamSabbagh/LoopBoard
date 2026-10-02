@@ -15,6 +15,7 @@ import {
 } from '../validators/auth.js';
 import {
   applicationBody,
+  applicationUpdate,
   applicationQuery,
   calendarQuery,
   communicationBody,
@@ -38,6 +39,7 @@ import {
   notificationQuery,
   skillBody,
   statusBody,
+  timelineEntryBody,
   studyPlanBody,
   topicBody,
   stackBody,
@@ -113,8 +115,9 @@ apiRouter.get('/applications/board', applicationController.board);
 apiRouter.get('/applications', validate({ query: applicationQuery }), applicationController.list);
 apiRouter.post('/applications', validate({ body: applicationBody }), applicationController.create);
 apiRouter.get('/applications/:id', validate({ params: idParams }), applicationController.get);
-apiRouter.put('/applications/:id', validate({ params: idParams, body: applicationBody.partial() }), applicationController.update);
+apiRouter.put('/applications/:id', validate({ params: idParams, body: applicationUpdate }), applicationController.update);
 apiRouter.patch('/applications/:id/status', validate({ params: idParams, body: statusBody }), applicationController.status);
+apiRouter.post('/applications/:id/timeline', validate({ params: idParams, body: timelineEntryBody }), applicationController.addTimeline);
 apiRouter.delete('/applications/:id', validate({ params: idParams }), applicationController.remove);
 
 apiRouter.get('/interviews/upcoming', interviewController.upcoming);

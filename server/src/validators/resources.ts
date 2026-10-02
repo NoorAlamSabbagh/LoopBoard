@@ -57,23 +57,61 @@ export const applicationQuery = paginationQuery.extend({
   status: enums.applicationStatus.optional(),
 });
 
-export const applicationBody = z.object({
-  companyId: objectId,
-  jobId: objectId,
+const applicationBase = z.object({
+  companyId: objectId.optional(),
+  companyName: z.string().trim().min(1).max(160).optional(),
+  companyTier: enums.companyTier.optional(),
+  jobId: objectId.optional(),
+  jobTitle: z.string().trim().min(1).max(200).optional(),
   title: z.string().trim().min(1).max(200),
   status: enums.applicationStatus.optional(),
   appliedAt: z.coerce.date().optional(),
+  recruiterCalledAt: z.coerce.date().optional(),
+  interviewScheduledAt: z.coerce.date().optional(),
+  selectedAt: z.coerce.date().optional(),
+  rejectedAt: z.coerce.date().optional(),
+  ignoredAt: z.coerce.date().optional(),
+  location: z.string().max(160).optional(),
+  workMode: enums.workMode.optional(),
+  salary: z.string().max(100).optional(),
   source: z.string().max(120).optional(),
   recruiterId: objectId.optional(),
-  recruiterEmail: z.string().email().optional(),
+  recruiterEmail: z.string().email().optional().or(z.literal('')),
   resumeId: objectId.optional(),
   coverLetter: z.string().max(20000).optional(),
   nextAction: z.string().max(400).optional(),
   nextActionAt: z.coerce.date().optional(),
   notes: z.string().max(8000).optional(),
+  scheduleInterview: z
+    .object({
+      type: enums.interviewType,
+      roundName: z.string().min(1).max(120),
+      scheduledAt: z.coerce.date(),
+      status: enums.interviewStatus.optional(),
+      result: enums.interviewResult.optional(),
+      meetingLink: z.string().max(1000).optional(),
+      interviewerName: z.string().max(160).optional(),
+      difficulty: enums.difficulty.optional(),
+      notes: z.string().max(8000).optional(),
+    })
+    .optional(),
+});
+
+export const applicationUpdate = applicationBase.partial();
+
+export const applicationBody = applicationBase.refine((data) => Boolean(data.companyId || data.companyName), {
+  message: 'Either companyId or companyName must be provided',
+  path: ['companyId'],
 });
 
 export const statusBody = z.object({ status: enums.applicationStatus });
+
+export const timelineEntryBody = z.object({
+  stage: z.string().min(1).max(100),
+  date: z.coerce.date().optional(),
+  title: z.string().min(1).max(200),
+  notes: z.string().max(4000).optional(),
+});
 
 export const interviewQuery = paginationQuery.extend({
   companyId: objectId.optional(),

@@ -56,12 +56,57 @@ export type Job = {
 export type Application = {
   id: string;
   companyId: string;
-  jobId: string;
+  jobId?: string;
   title: string;
   status: string;
   appliedAt?: string;
+  recruiterCalledAt?: string;
+  interviewScheduledAt?: string;
+  selectedAt?: string;
+  rejectedAt?: string;
+  ignoredAt?: string;
+  timeline?: {
+    stage: string;
+    date: string;
+    title: string;
+    notes?: string;
+  }[];
+  location?: string;
+  workMode?: string;
+  salary?: string;
   source?: string;
   notes?: string;
+  companyName?: string;
+  company?: {
+    id: string;
+    name: string;
+    logoUrl?: string;
+    tier?: number;
+    targetStatus?: string;
+  };
+  job?: {
+    id: string;
+    title: string;
+    location?: string;
+    workMode?: string;
+  };
+  interviewsCount?: number;
+  upcomingInterview?: {
+    id: string;
+    roundName: string;
+    type: string;
+    scheduledAt: string;
+    status: string;
+    meetingLink?: string;
+  } | null;
+  latestInterview?: {
+    id: string;
+    roundName: string;
+    type: string;
+    scheduledAt: string;
+    status: string;
+    result: string;
+  } | null;
 };
 
 export type Interview = {

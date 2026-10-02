@@ -67,6 +67,10 @@ export const dataApi = {
   createApplication: (body: Record<string, unknown>) => unwrap<Application>(api.post('/applications', body)),
   updateApplication: (id: string, body: Record<string, unknown>) => unwrap<Application>(api.put(`/applications/${id}`, body)),
   setStatus: (id: string, status: string) => unwrap<Application>(api.patch(`/applications/${id}/status`, { status })),
+  addTimeline: (id: string, body: { stage: string; date?: string; title: string; notes?: string }) =>
+    unwrap<Application>(api.post(`/applications/${id}/timeline`, body)),
+  addApplicationTimeline: (id: string, body: { stage: string; date?: string; title: string; notes?: string }) =>
+    unwrap<Application>(api.post(`/applications/${id}/timeline`, body)),
   deleteApplication: (id: string) => unwrap<null>(api.delete(`/applications/${id}`)),
 
   interviews: (query?: ListQuery) => unwrap<Interview[]>(api.get(`/interviews${qs(query)}`)),

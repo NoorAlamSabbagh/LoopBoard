@@ -138,10 +138,10 @@ export function InterviewsPage({ mode }: { mode: 'upcoming' | 'history' }) {
           </Field>
           <Field label="Application">
             <Select {...register('applicationId', { required: true })}>
-              <option value="">Select</option>
+              <option value="">Select Application</option>
               {apps.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.title}
+                  {a.company?.name || a.companyName ? `${a.company?.name || a.companyName} — ` : ''}{a.title}
                 </option>
               ))}
             </Select>
